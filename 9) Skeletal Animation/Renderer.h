@@ -1,3 +1,4 @@
+#include "../../nclgl/common.h"
 #ifdef WEEK_2_CODE
 #pragma once
 
