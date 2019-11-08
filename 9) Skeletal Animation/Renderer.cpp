@@ -1,4 +1,3 @@
-
 #include "Renderer.h"
 #ifdef WEEK_2_CODE
 
