@@ -57,6 +57,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial 11 - Real-time Lighting A", "11) Per Fragment Lighting A\Tutorial11.vcxproj", "{95F93172-8DC5-4E52-80B6-0D56624BD569}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial 12 - Real-time Lighting B", "12) Per Fragment Lighting B\Tutorial12.vcxproj", "{DC9F082D-63BA-4BD1-8A60-1BC13F745154}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial 13 - Cube Mapping", "13) Cube Mapping\Tutorial13.vcxproj", "{2E797EF1-6CA2-4611-BC4F-A3146AEBB468}"
 EndProject
