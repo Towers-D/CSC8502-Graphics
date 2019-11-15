@@ -2,34 +2,35 @@
 
 #include "../../nclgl/OGLRenderer.h"
 #include "../../nclgl/Camera.h"
-#include "../../nclgl/MD5Mesh.h"
-#include "../../nclgl/MD5Node.h"
-
-#define SHADOWSIZE 2048
+#include "../../nclgl/HeightMap.h"
 
 class Renderer : public OGLRenderer {
 public:
 	Renderer(Window& parent);
 	virtual ~Renderer();
 
-	virtual void UpdateScene(float msec);
 	virtual void RenderScene();
+	virtual void UpdateScene(float msec);
 
 protected:
-	void DrawMesh();
+	void DrawHeightmap();
+	void DrawWater();
+	void DrawSkyBox();
 	void DrawFloor();
-	void DrawShadowScene();
-	void DrawCombinedScene();
 
-	Shader* sceneShader;
-	Shader* shadowShader;
+	Shader* lightShader;
+	Shader* reflectShader;
+	Shader* skyboxShader;
+	Shader* riverShader;
 
-	GLuint shadowTex;
-	GLuint shadowFBO;
+	HeightMap* heightMap;
+	Mesh* quad;
+	Mesh* test;
 
-	MD5FileData* hellData;
-	MD5Node* hellNode;
-	Mesh* floor;
-	Camera* camera;
 	Light* light;
+	Camera* camera;
+
+	GLuint cubeMap;
+
+	float waterRotate;
 };

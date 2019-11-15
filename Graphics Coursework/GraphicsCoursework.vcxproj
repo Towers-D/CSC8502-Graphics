@@ -41,7 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>..\..\GLEW\include;..\..\SOIL;..\nclgl;$(IncludePath)</IncludePath>
-    <LibraryPath>..\..\GLEW\lib;..\..\SOIL\$(Configuration);..\$(Configuration)\;..\..\nclgl\$(Configuration)\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\..\GLEW\lib\$(Configuration);..\..\SOIL\$(Configuration)\;..\$(Configuration)\;$(LibraryPath)</LibraryPath>
     <LinkIncremental />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

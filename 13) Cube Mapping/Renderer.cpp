@@ -108,7 +108,7 @@ void Renderer::DrawWater() {
 	SetCurrentShader(reflectShader);
 	SetShaderLight(*light);
 	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), "cameraPos"), 1, (float*) & camera->GetPosition());
-	//glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "cubeTex"), 2);
 

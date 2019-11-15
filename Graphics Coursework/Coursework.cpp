@@ -1,15 +1,15 @@
 #pragma comment(lib, "nclgl.lib")
 
-#include "../../NCLGL/window.h"
+#include "../../nclgl/window.h"
 #include "Renderer.h"
 
 int main() {
-	Window w("Shadow Mapping! MD5 mesh courtesy of http://www.katsbits.com/", 800, 600, false); //This is all boring win32 window creation stuff!
+	Window w("Cube Mapping! sky textures courtesy of http://www.hazelwhorley.com", 800, 600, false);
 	if (!w.HasInitialised()) {
 		return -1;
 	}
 
-	Renderer renderer(w); //This handles all the boring OGL 3.2 initialisation stuff, and sets up our tutorial!
+	Renderer renderer(w);
 	if (!renderer.HasInitialised()) {
 		return -1;
 	}
