@@ -20,6 +20,15 @@ int main() {
 	while (w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
 		renderer.UpdateScene(w.GetTimer()->GetTimedMS());
 		renderer.RenderScene();
+
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_R)) {
+			renderer.ResetTime();
+		}
+
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_T)) {
+			renderer.ResetTime();
+			renderer.loadShaders();
+		}
 	}
 
 	return 0;
