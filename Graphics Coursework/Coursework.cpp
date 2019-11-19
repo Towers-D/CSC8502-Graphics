@@ -1,6 +1,7 @@
 #pragma comment(lib, "nclgl.lib")
 
 #include "../../nclgl/window.h"
+#include "../../nclgl/light.h"
 #include "Renderer.h"
 
 int main() {
@@ -17,7 +18,10 @@ int main() {
 	w.LockMouseToWindow(true);
 	w.ShowOSPointer(false);
 
+	Light* l = renderer.getLight();
+
 	while (w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
+		Vector3 pos = l->GetPosition();
 		renderer.UpdateScene(w.GetTimer()->GetTimedMS());
 		renderer.RenderScene();
 
@@ -29,6 +33,21 @@ int main() {
 			renderer.ResetTime();
 			renderer.loadShaders();
 		}
+
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_UP)) {
+			pos.z -= 5;
+		}
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_DOWN)) {
+			pos.z += 5;
+		}
+
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_LEFT)) {
+			pos.x -= 5;
+		}
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT)) {
+			pos.x += 5;
+		}
+		l->SetPosition(pos);
 	}
 
 	return 0;

@@ -5,8 +5,8 @@
 #include "../../nclgl/HeightMap.h"
 #include "../../nclgl/SceneNode.h"
 #include "../../nclgl/Frustrum.h"
-#include "../../nclgl/MD5Mesh.h"
-#include "../../nclgl/MD5Node.h"
+#include "../../nclgl/OBJMesh.h"
+
 
 #define SHADOWSIZE 2048
 
@@ -21,6 +21,8 @@ public:
 
 	void ResetTime() { time = 0; };
 	void loadShaders();
+
+	Light* getLight() { return light; }
 
 protected:
 	void DrawHeightmap();
@@ -44,7 +46,6 @@ protected:
 
 	HeightMap* heightMap;
 	Mesh* quad;
-	Mesh* test;
 
 	Light* light;
 	Camera* camera;
@@ -55,8 +56,7 @@ protected:
 	GLuint ShadowTex;
 	GLuint ShadowFBO;
 
-	MD5FileData* treeData;
-	MD5Node* treeNode;
+	OBJMesh* treeNode;
 
 	float waterRotate;
 	float time = 0;
