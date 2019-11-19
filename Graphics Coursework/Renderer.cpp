@@ -5,7 +5,7 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	heightMap = new HeightMap(TEXTUREDIR "/terrain.raw");
 	quad = Mesh::GenerateQuad();
 	test = Mesh::GenerateQuad(); // new HeightMap(TEXTUREDIR "/terrain.raw");
-	//heightMap->SetType(GL_PATCHES);
+	heightMap->SetType(GL_PATCHES);
 
 	treeData = new MD5FileData(MESHDIR "hellknight.md5mesh");
 	treeNode = new MD5Node(*treeData);
@@ -37,6 +37,7 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 									SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
 	if (!cubeMap || !quad->GetTexture() || quad->GetBumpMap() || !heightMap->GetTexture() || !heightMap->GetBumpMap() || !test->GetTexture())
 		return;
+
 
 	SetTextureRepeating(test->GetTexture(), true);
 
@@ -92,8 +93,8 @@ void Renderer::RenderScene() {
 
 	
 	DrawSkyBox();
-	DrawHeightmap();
-	//DrawFloor();
+	//DrawHeightmap();
+	DrawFloor();
 	DrawWater();
 
 
@@ -169,14 +170,17 @@ void Renderer::DrawFloor() {
 	glBindTexture(GL_TEXTURE_2D, moveTex);
 
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "cubeTex"), 2);
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "tli"), 1024);
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "tlo"), 1024);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "tli"), 1);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "tlo"), 1);
 	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "time"), time);
 	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "defy"), heightY);
 	//glPatchParameteri(GL_PATCH_VERTICES, 4);
 
-	modelMatrix = Matrix4::Translation(Vector3(heightX, heightY, heightZ)) * Matrix4::Scale(Vector3(heightX, 1, heightZ)) * Matrix4::Rotation(90, Vector3(1.0f, 0.0f, 0.0f));
-	textureMatrix = Matrix4::Scale(Vector3(100.0f, 100.0f, 100.0f));
+	//modelMatrix = Matrix4::Translation(Vector3(heightX, heightY, heightZ)) * Matrix4::Scale(Vector3(heightX, 1, heightZ)) * Matrix4::Rotation(90, Vector3(1.0f, 0.0f, 0.0f));
+	//textureMatrix = Matrix4::Scale(Vector3(100.0f, 100.0f, 100.0f));
+
+	modelMatrix.ToIdentity();
+	textureMatrix.ToIdentity();
 
 	UpdateShaderMatrices();
 	heightMap->Draw();

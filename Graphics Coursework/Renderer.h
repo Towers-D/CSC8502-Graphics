@@ -29,7 +29,8 @@ protected:
 	void DrawFloor();
 
 	void DrawMesh();
-	void DrawCombined();
+	void DrawShadowScene();
+	void DrawCombinedScene();
 
 	SceneNode* root;
 	Frustrum frameFrustrum;
@@ -38,6 +39,8 @@ protected:
 	Shader* reflectShader;
 	Shader* skyboxShader;
 	Shader* riverShader;
+	Shader* sceneShader;
+	Shader* shadowShader;
 
 	HeightMap* heightMap;
 	Mesh* quad;
@@ -48,6 +51,9 @@ protected:
 
 	GLuint cubeMap;
 	GLuint moveTex;
+
+	GLuint ShadowTex;
+	GLuint ShadowFBO;
 
 	MD5FileData* treeData;
 	MD5Node* treeNode;
