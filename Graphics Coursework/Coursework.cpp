@@ -30,7 +30,6 @@ int main() {
 		}
 
 		if (Window::GetKeyboard()->KeyDown(KEYBOARD_T)) {
-			renderer.ResetTime();
 			renderer.loadShaders();
 		}
 

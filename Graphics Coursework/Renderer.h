@@ -51,7 +51,9 @@ protected:
 	Camera* camera;
 
 	GLuint cubeMap;
-	GLuint moveTex;
+	GLuint red;
+	GLuint green;
+	GLuint blue;
 
 	GLuint ShadowTex;
 	GLuint ShadowFBO;
