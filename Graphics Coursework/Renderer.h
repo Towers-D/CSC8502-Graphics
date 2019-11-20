@@ -29,6 +29,7 @@ protected:
 	void DrawWater();
 	void DrawSkyBox();
 	void DrawFloor();
+	void DrawRain();
 
 	void DrawMesh();
 	void DrawShadowScene();
@@ -43,9 +44,12 @@ protected:
 	Shader* riverShader;
 	Shader* sceneShader;
 	Shader* shadowShader;
+	Shader* treeShader;
+	Shader* rainShader;
 
 	HeightMap* heightMap;
 	Mesh* quad;
+	Mesh* rain;
 
 	Light* light;
 	Camera* camera;
