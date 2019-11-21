@@ -60,6 +60,7 @@ protected:
 	GLuint green;
 	GLuint blue;
 	GLuint grass;
+	GLuint mud;
 
 	GLuint ShadowTex;
 	GLuint ShadowFBO;
