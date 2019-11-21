@@ -19,20 +19,21 @@ public:
 	virtual void RenderScene();
 	virtual void UpdateScene(float msec);
 
-	void ResetTime() { time = 0; };
+	void ResetTime() { time = 12000; };
 	void loadShaders();
 
-	Light* getLight() { return light; }
+	Light* getLight() { return light; };
 
 protected:
 	void DrawHeightmap();
 	void DrawWater();
+	void DrawWaterS();
 	void DrawSkyBox();
 	void DrawFloor();
 	void DrawRain();
 
 	void DrawMesh();
-	void DrawShadowScene();
+	void DrawShadowScene(Vector4 store);
 	void DrawCombinedScene();
 
 	SceneNode* root;
@@ -70,6 +71,7 @@ protected:
 	float waterRotate;
 	float time = 0;
 
+	Vector2 size;
 	vector<SceneNode*> transparentNodeList;
 	vector<SceneNode*> nodeList;
 };

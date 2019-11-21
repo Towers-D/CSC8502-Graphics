@@ -1,8 +1,8 @@
 #include "Renderer.h"
 
 Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
+	size = parent.GetScreenSize();
 	camera = new Camera();
-	overhead = new Camera();
 	heightMap = new HeightMap(TEXTUREDIR "/terrain.raw");
 	quad = Mesh::GenerateQuad();
 	rain = Mesh::GenerateQuad();
@@ -11,10 +11,11 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	treeNode = new OBJMesh(MESHDIR "lowtree.obj");
 	treeNode->SetTexture(SOIL_load_OGL_texture(TEXTUREDIR "Barren Reds.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0));
 	treeNode->SetBumpMap(SOIL_load_OGL_texture(TEXTUREDIR "Barren RedsDOT3.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0));
-
+	glViewport(0, 0, 200, 200);
+	
 	camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 500.0f, RAW_WIDTH * HEIGHTMAP_X));
-	//overhead->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 1000.0f, RAW_WIDTH * HEIGHTMAP_X));
-	//overhead.
+	
+	
 
 	light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f) * 3, 500.0f, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f) * 3), Vector4(0.9f, 0.9f, 1.0f, 1), (RAW_WIDTH * HEIGHTMAP_X) * 3);
 
@@ -86,6 +87,8 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 
 	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45.0f);
 
+	glScissor(size.x - 200, size.y - 200, 200, 200);
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -123,23 +126,63 @@ void Renderer::loadShaders() {
 
 void Renderer::UpdateScene(float msec) {
 	camera->UpdateCamera(msec);
-	overhead->UpdateCamera(msec);
-	viewMatrix = camera->BuildViewMatrix();
+	/*viewMatrix = camera->BuildViewMatrix();*/
 	waterRotate += msec / 1000.0f;
 	time += msec;
 }
 
 void Renderer::RenderScene() {
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	Vector4 store = Vector4(0, 0, width, height);
+	glViewport(0, 0, width, height);
+	
+	viewMatrix = camera->BuildViewMatrix();
+	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45.0f);
 	DrawSkyBox();
-	DrawShadowScene();
+	DrawShadowScene(store);
+	DrawFloor();
+	DrawWater();
+	DrawCombinedScene();
+
+	DrawRain();
+	
+
+
+	Vector3 currPos = camera->GetPosition();
+	float currRoll = camera->GetRoll();
+	float currYaw = camera->GetYaw();
+	float currPitch = camera->GetPitch();
+
+	
+	
+	camera->SetPosition(Vector3((RAW_WIDTH * HEIGHTMAP_X / 2.0f) * 3, 12000, (RAW_WIDTH * HEIGHTMAP_Z / 2.0f) * 3));
+	camera->SetPitch(-90);
+	camera->SetYaw(0);
+	camera->SetRoll(0);
+	
+	glViewport(size.x - 200, size.y - 200, 200, 200);
+	glEnable(GL_SCISSOR_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	glDisable(GL_SCISSOR_TEST);
+	viewMatrix = camera->BuildViewMatrix();
+	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)(size.x - 200) / (float)(size.y - 200), 35);
+	DrawSkyBox();
+	DrawWater();
 	DrawFloor();
 	DrawCombinedScene();
-	DrawWater();
 	DrawRain();
 
+	
+
 	SwapBuffers();
+
+
+	camera->SetPosition(currPos);
+	camera->SetPitch(currPitch);
+	camera->SetYaw(currYaw);
+	camera->SetRoll(currRoll);
+
 }
 
 void Renderer::DrawWater() {
@@ -149,11 +192,14 @@ void Renderer::DrawWater() {
 	//glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "cubeTex"), 2);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), 3);
 	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "time"), time);
 
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, ShadowTex);
 
 	float heightX = (RAW_WIDTH * HEIGHTMAP_X / 2.0f) * 3;
 	float heightY = 256 * HEIGHTMAP_Y / 6.0f;
@@ -165,6 +211,22 @@ void Renderer::DrawWater() {
 	UpdateShaderMatrices();
 	quad->Draw();
 	glUseProgram(0);
+}
+
+void Renderer::DrawWaterS() {
+	UpdateShaderMatrices();
+	Matrix4 tempMatrix = textureMatrix * modelMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
+	quad->Draw();
+}
+
+void Renderer::DrawHeightmap() {
+	UpdateShaderMatrices();
+	Matrix4 tempMatrix = textureMatrix * modelMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
+	heightMap->Draw();
 }
 
 void Renderer::DrawRain() {
@@ -190,7 +252,7 @@ void Renderer::DrawRain() {
 	glUseProgram(0);
 }
 
-void Renderer::DrawShadowScene() {
+void Renderer::DrawShadowScene(Vector4 store) {
 	glBindFramebuffer(GL_FRAMEBUFFER, ShadowFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, SHADOWSIZE, SHADOWSIZE);
@@ -199,14 +261,16 @@ void Renderer::DrawShadowScene() {
 	viewMatrix = Matrix4::BuildViewMatrix(light->GetPosition(), Vector3(0, 0, 0));
 	textureMatrix = biasMatrix * (projMatrix * viewMatrix);
 	UpdateShaderMatrices();
-	DrawMesh();
+	DrawWaterS();
 	DrawHeightmap();
+	DrawMesh();
+
 	
 
 	glUseProgram(0);
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	glViewport(0, 0, width, height);
-
+	glViewport(store.x, store.y, store.z, store.w);
+	viewMatrix = camera->BuildViewMatrix();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -221,17 +285,15 @@ void Renderer::DrawCombinedScene() {
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, ShadowTex);
 
-	viewMatrix = camera->BuildViewMatrix();
+	//viewMatrix = camera->BuildViewMatrix();
 	UpdateShaderMatrices();
 	DrawMesh();
 	glUseProgram(0);
 }
 
 void Renderer::DrawMesh() {
-	//Shader* prev = currentShader;
-	//SetCurrentShader(sceneShader);
 	modelMatrix = Matrix4::Scale(Vector3(200, 200, 200)) * Matrix4::Translation(Vector3(11, 1, 4));
-	UpdateShaderMatrices();
+	//UpdateShaderMatrices();
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
@@ -239,7 +301,6 @@ void Renderer::DrawMesh() {
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
 
 	treeNode->Draw();
-	//if (prev) SetCurrentShader(prev);
 }
 
 void Renderer::DrawSkyBox() {
@@ -253,14 +314,7 @@ void Renderer::DrawSkyBox() {
 	glDepthMask(GL_TRUE);
 }
 
-void Renderer::DrawHeightmap() {
-	modelMatrix = Matrix4::Translation(Vector3(0, 0, 0));
-	UpdateShaderMatrices();
-	Matrix4 tempMatrix = textureMatrix * modelMatrix;
-	glUniformMatrix4fv(glGetUniformLocation(currentShader -> GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
-	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
-	heightMap->Draw();
-}
+
 
 void Renderer::DrawFloor() {
 	SetCurrentShader(riverShader);
@@ -301,7 +355,7 @@ void Renderer::DrawFloor() {
 	textureMatrix.ToIdentity();
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;
 
-	viewMatrix = camera->BuildViewMatrix();
+	//viewMatrix = camera->BuildViewMatrix();
 	UpdateShaderMatrices();
 
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
