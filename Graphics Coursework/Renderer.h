@@ -53,11 +53,13 @@ protected:
 
 	Light* light;
 	Camera* camera;
+	Camera* overhead;
 
 	GLuint cubeMap;
 	GLuint red;
 	GLuint green;
 	GLuint blue;
+	GLuint grass;
 
 	GLuint ShadowTex;
 	GLuint ShadowFBO;

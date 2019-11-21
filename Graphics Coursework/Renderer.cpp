@@ -2,6 +2,7 @@
 
 Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	camera = new Camera();
+	overhead = new Camera();
 	heightMap = new HeightMap(TEXTUREDIR "/terrain.raw");
 	quad = Mesh::GenerateQuad();
 	rain = Mesh::GenerateQuad();
@@ -12,8 +13,10 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	treeNode->SetBumpMap(SOIL_load_OGL_texture(TEXTUREDIR "Barren RedsDOT3.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0));
 
 	camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 500.0f, RAW_WIDTH * HEIGHTMAP_X));
+	//overhead->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 1000.0f, RAW_WIDTH * HEIGHTMAP_X));
+	//overhead.
 
-	light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f), 500.0f, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)), Vector4(0.9f, 0.9f, 1.0f, 1), (RAW_WIDTH * HEIGHTMAP_X) / 2.0f);
+	light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f), 500.0f, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)), Vector4(0.9f, 0.9f, 1.0f, 1), (RAW_WIDTH * HEIGHTMAP_X));
 
 	loadShaders();
 	if (!reflectShader->LinkProgram() || !rainShader->LinkProgram() || !skyboxShader->LinkProgram() || !treeShader->LinkProgram() || !riverShader->LinkProgram() || !shadowShader->LinkProgram() || !sceneShader->LinkProgram())
@@ -23,6 +26,8 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	red = SOIL_load_OGL_texture(TEXTUREDIR "red.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
 	green = SOIL_load_OGL_texture(TEXTUREDIR "green.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
 	blue = SOIL_load_OGL_texture(TEXTUREDIR "blue.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
+
+	grass = SOIL_load_OGL_texture(TEXTUREDIR "grass 3.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
 
 
 	quad->SetTexture(SOIL_load_OGL_texture(TEXTUREDIR "water.TGA", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
@@ -71,6 +76,7 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 
 	SetTextureRepeating(heightMap->GetTexture(), true);
 	SetTextureRepeating(heightMap->GetBumpMap(), true);
+	SetTextureRepeating(grass, true);
 
 	init = true;
 	waterRotate = 0.0f;
@@ -109,11 +115,12 @@ void Renderer::loadShaders() {
 	sceneShader = new Shader(SHADERDIR "shadowscenevert.glsl", SHADERDIR "shadowscenefrag.glsl");
 	shadowShader = new Shader(SHADERDIR "shadowVert.glsl", SHADERDIR "shadowFrag.glsl");
 	treeShader = new Shader(SHADERDIR "shadowVer2.glsl", SHADERDIR "shadowFrag2.glsl");
-	rainShader = new Shader(SHADERDIR  "TexturedVertex.glsl", SHADERDIR "TexturedFragment.glsl", "", SHADERDIR "rainTCS.glsl", SHADERDIR "rainTES.glsl");
+	rainShader = new Shader(SHADERDIR  "TexturedVertex.glsl", SHADERDIR "TexturedFragment.glsl", SHADERDIR "rainGeom.glsl", SHADERDIR "rainTCS.glsl", SHADERDIR "rainTES.glsl");
  }
 
 void Renderer::UpdateScene(float msec) {
 	camera->UpdateCamera(msec);
+	overhead->UpdateCamera(msec);
 	viewMatrix = camera->BuildViewMatrix();
 	waterRotate += msec / 1000.0f;
 	time += msec;
@@ -139,6 +146,7 @@ void Renderer::DrawWater() {
 	//glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "cubeTex"), 2);
+	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "time"), time);
 
 
 	glActiveTexture(GL_TEXTURE2);
@@ -158,15 +166,19 @@ void Renderer::DrawWater() {
 
 void Renderer::DrawRain() {
 	SetCurrentShader(rainShader);
-
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "tli"), 1024);
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "tlo"), 1024);
-
 	float heightX = (RAW_WIDTH * HEIGHTMAP_X / 2.0f);
-	float heightY = 256 * HEIGHTMAP_Y / 6.0f;
+	float heightY = 2000 + 256 * HEIGHTMAP_Y / 6.0f;
 	float heightZ = (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f);
 
-	modelMatrix = Matrix4::Translation(Vector3(heightX, heightY + 2000, heightZ)) * Matrix4::Scale(Vector3(heightX, 1, heightZ)) * Matrix4::Rotation(90, Vector3(1.0f, 0.0f, 0.0f));
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "tli"), 2048);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "tlo"), 2048);
+	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "time"), time);
+	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "defy"), heightY);
+
+
+
+
+	modelMatrix = Matrix4::Translation(Vector3(heightX, heightY, heightZ)) * Matrix4::Scale(Vector3(heightX, 1, heightZ)) * Matrix4::Rotation(90, Vector3(1.0f, 0.0f, 0.0f));
 	textureMatrix = Matrix4::Scale(Vector3(10.0f, 10.0f, 10.0f)) * Matrix4::Rotation(waterRotate, Vector3(0.0f, 0.0f, 1.0f));
 	glPatchParameteri(GL_PATCH_VERTICES, 4);
 
@@ -184,9 +196,9 @@ void Renderer::DrawShadowScene() {
 	viewMatrix = Matrix4::BuildViewMatrix(light->GetPosition(), Vector3(0, 0, 0));
 	textureMatrix = biasMatrix * (projMatrix * viewMatrix);
 	UpdateShaderMatrices();
-
-	DrawHeightmap();
 	DrawMesh();
+	DrawHeightmap();
+	
 
 	glUseProgram(0);
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -257,6 +269,7 @@ void Renderer::DrawFloor() {
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), 2);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "grass"), 6);
 
 	SetShaderLight(*light);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "red"), 3);
@@ -271,6 +284,8 @@ void Renderer::DrawFloor() {
 	glBindTexture(GL_TEXTURE_2D, green);
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, blue);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, grass);
 
 	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "time"), time);
 	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "defy"), heightY);

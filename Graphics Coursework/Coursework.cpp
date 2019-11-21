@@ -18,6 +18,8 @@ int main() {
 	w.LockMouseToWindow(true);
 	w.ShowOSPointer(false);
 
+	
+
 	Light* l = renderer.getLight();
 
 	while (w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
@@ -45,6 +47,10 @@ int main() {
 		}
 		if (Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT)) {
 			pos.x += 5;
+		}
+
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_P)) {
+			w.switchFullScreen();
 		}
 		l->SetPosition(pos);
 	}
