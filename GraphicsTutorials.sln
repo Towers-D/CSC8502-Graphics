@@ -73,9 +73,48 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GraphicsCoursework", "Graph
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Extra - Drawing Text", "Extra - Drawing Text\Drawing Text.vcxproj", "{D0AFE823-365D-49D6-B9AD-B417C23A4D1A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{8ED63285-D662-47E2-A1A7-BEDEB9990880}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{3AD56A82-FE2A-455E-B277-7831F914E104}"
 	ProjectSection(SolutionItems) = preProject
-		..\Shaders\basicVertex.glsl = ..\Shaders\basicVertex.glsl
+		Shaders\basicVertex.glsl = Shaders\basicVertex.glsl
+		Shaders\bufferFragment.glsl = Shaders\bufferFragment.glsl
+		Shaders\bumpFragment.glsl = Shaders\bumpFragment.glsl
+		Shaders\bumpVertex.glsl = Shaders\bumpVertex.glsl
+		Shaders\colourFragment.glsl = Shaders\colourFragment.glsl
+		Shaders\combinefrag.glsl = Shaders\combinefrag.glsl
+		Shaders\combinevert.glsl = Shaders\combinevert.glsl
+		Shaders\debugFragment.glsl = Shaders\debugFragment.glsl
+		Shaders\debugVertex.glsl = Shaders\debugVertex.glsl
+		Shaders\geom.glsl = Shaders\geom.glsl
+		Shaders\MatrixVertex.glsl = Shaders\MatrixVertex.glsl
+		Shaders\PerPixelFragment.glsl = Shaders\PerPixelFragment.glsl
+		Shaders\PerPixelVertex.glsl = Shaders\PerPixelVertex.glsl
+		Shaders\pointlightfragment.glsl = Shaders\pointlightfragment.glsl
+		Shaders\pointlightvertex.glsl = Shaders\pointlightvertex.glsl
+		Shaders\processFrag.glsl = Shaders\processFrag.glsl
+		Shaders\rainGeom.glsl = Shaders\rainGeom.glsl
+		Shaders\rainTCS.glsl = Shaders\rainTCS.glsl
+		Shaders\rainTES.glsl = Shaders\rainTES.glsl
+		Shaders\reflectFragment.glsl = Shaders\reflectFragment.glsl
+		Shaders\riverFrag.glsl = Shaders\riverFrag.glsl
+		Shaders\riverVert.glsl = Shaders\riverVert.glsl
+		Shaders\SceneFragment.glsl = Shaders\SceneFragment.glsl
+		Shaders\SceneVertex.glsl = Shaders\SceneVertex.glsl
+		Shaders\shadowFrag.glsl = Shaders\shadowFrag.glsl
+		Shaders\shadowFrag2.glsl = Shaders\shadowFrag2.glsl
+		Shaders\shadowscenefrag.glsl = Shaders\shadowscenefrag.glsl
+		Shaders\shadowscenevert.glsl = Shaders\shadowscenevert.glsl
+		Shaders\shadowVer2.glsl = Shaders\shadowVer2.glsl
+		Shaders\shadowVert.glsl = Shaders\shadowVert.glsl
+		Shaders\skeletonVertex Commented.glsl = Shaders\skeletonVertex Commented.glsl
+		Shaders\skeletonVertex.glsl = Shaders\skeletonVertex.glsl
+		Shaders\skeletonVertexSimple.glsl = Shaders\skeletonVertexSimple.glsl
+		Shaders\skyboxFragment.glsl = Shaders\skyboxFragment.glsl
+		Shaders\skyboxVertex.glsl = Shaders\skyboxVertex.glsl
+		Shaders\StencilFragment.glsl = Shaders\StencilFragment.glsl
+		Shaders\TCS.glsl = Shaders\TCS.glsl
+		Shaders\TES.glsl = Shaders\TES.glsl
+		Shaders\TexturedFragment.glsl = Shaders\TexturedFragment.glsl
+		Shaders\TexturedVertex.glsl = Shaders\TexturedVertex.glsl
 	EndProjectSection
 EndProject
 Global
