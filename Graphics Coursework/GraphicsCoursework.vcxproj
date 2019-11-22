@@ -82,48 +82,6 @@
       <Project>{98d6b51b-cb0a-4389-adc6-24082b967c3f}</Project>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\Shaders\basicVertex.glsl" />
-    <None Include="..\..\Shaders\bufferFragment.glsl" />
-    <None Include="..\..\Shaders\bumpFragment.glsl" />
-    <None Include="..\..\Shaders\bumpVertex.glsl" />
-    <None Include="..\..\Shaders\colourFragment.glsl" />
-    <None Include="..\..\Shaders\combinefrag.glsl" />
-    <None Include="..\..\Shaders\combinevert.glsl" />
-    <None Include="..\..\Shaders\debugFragment.glsl" />
-    <None Include="..\..\Shaders\debugVertex.glsl" />
-    <None Include="..\..\Shaders\geom.glsl" />
-    <None Include="..\..\Shaders\MatrixVertex.glsl" />
-    <None Include="..\..\Shaders\PerPixelFragment.glsl" />
-    <None Include="..\..\Shaders\PerPixelVertex.glsl" />
-    <None Include="..\..\Shaders\pointlightfragment.glsl" />
-    <None Include="..\..\Shaders\pointlightvertex.glsl" />
-    <None Include="..\..\Shaders\processFrag.glsl" />
-    <None Include="..\..\Shaders\rainGeom.glsl" />
-    <None Include="..\..\Shaders\rainTCS.glsl" />
-    <None Include="..\..\Shaders\rainTES.glsl" />
-    <None Include="..\..\Shaders\reflectFragment.glsl" />
-    <None Include="..\..\Shaders\riverFrag.glsl" />
-    <None Include="..\..\Shaders\riverVert.glsl" />
-    <None Include="..\..\Shaders\SceneFragment.glsl" />
-    <None Include="..\..\Shaders\SceneVertex.glsl" />
-    <None Include="..\..\Shaders\shadowFrag.glsl" />
-    <None Include="..\..\Shaders\shadowFrag2.glsl" />
-    <None Include="..\..\Shaders\shadowscenefrag.glsl" />
-    <None Include="..\..\Shaders\shadowscenevert.glsl" />
-    <None Include="..\..\Shaders\shadowVer2.glsl" />
-    <None Include="..\..\Shaders\shadowVert.glsl" />
-    <None Include="..\..\Shaders\skeletonVertex Commented.glsl" />
-    <None Include="..\..\Shaders\skeletonVertex.glsl" />
-    <None Include="..\..\Shaders\skeletonVertexSimple.glsl" />
-    <None Include="..\..\Shaders\skyboxFragment.glsl" />
-    <None Include="..\..\Shaders\skyboxVertex.glsl" />
-    <None Include="..\..\Shaders\StencilFragment.glsl" />
-    <None Include="..\..\Shaders\TCS.glsl" />
-    <None Include="..\..\Shaders\TES.glsl" />
-    <None Include="..\..\Shaders\TexturedFragment.glsl" />
-    <None Include="..\..\Shaders\TexturedVertex.glsl" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
