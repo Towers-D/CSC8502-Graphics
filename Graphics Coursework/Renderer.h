@@ -19,33 +19,27 @@ public:
 	virtual void RenderScene();
 	virtual void UpdateScene(float msec);
 
-	void ResetTime() { time = 12000; };
-	void loadShaders();
+	void ResetTime() { time = 0; };
+	bool loadShaders();
 
 	Light* getLight() { return light; };
 
 protected:
-	void DrawHeightmap();
-	void DrawWater();
-	void DrawWaterS();
 	void DrawSkyBox();
+	void DrawWater();
 	void DrawFloor();
 	void DrawRain();
-
 	void DrawMesh();
-	void DrawShadowScene(Vector4 store);
+
+	void DrawShadowScene();
 	void DrawCombinedScene();
 
-	SceneNode* root;
-	Frustrum frameFrustrum;
 
-	Shader* lightShader;
 	Shader* reflectShader;
 	Shader* skyboxShader;
 	Shader* riverShader;
 	Shader* sceneShader;
 	Shader* shadowShader;
-	Shader* treeShader;
 	Shader* rainShader;
 
 	HeightMap* heightMap;
@@ -53,6 +47,7 @@ protected:
 	Mesh* rain;
 
 	Light* light;
+	Light* nolight;
 	Camera* camera;
 	Camera* overhead;
 
@@ -61,7 +56,9 @@ protected:
 	GLuint green;
 	GLuint blue;
 	GLuint grass;
+	GLuint grassNorm;
 	GLuint mud;
+	GLuint mudNorm;
 
 	GLuint ShadowTex;
 	GLuint ShadowFBO;
@@ -70,8 +67,4 @@ protected:
 
 	float waterRotate;
 	float time = 0;
-
-	Vector2 size;
-	vector<SceneNode*> transparentNodeList;
-	vector<SceneNode*> nodeList;
 };
