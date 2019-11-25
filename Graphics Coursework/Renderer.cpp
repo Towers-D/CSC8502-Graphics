@@ -8,6 +8,7 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	heightMap = new HeightMap(TEXTUREDIR "/terrain.raw");
 	quad = Mesh::GenerateQuad();
 	rain = Mesh::GenerateQuad();
+	test = Mesh::GenerateQuad();
 	rain->SetType(GL_PATCHES);
 	treeNode = new OBJMesh(MESHDIR "lowtree.obj");
 
@@ -71,7 +72,38 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	glDrawBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	init = true;
+	//Generate Dpeth Textures for Post Processing
+	glGenTextures(1, &bufferDepthTex);
+	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+
+	for (int i = 0; i < 2; ++i) {
+		glGenTextures(1, &bufferColourTex[i]);
+		glBindTexture(GL_TEXTURE_2D, bufferColourTex[i]);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	}
+
+	glGenFramebuffers(1, &bufferFBO);
+	glGenFramebuffers(1, &processFBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[0], 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || !bufferDepthTex || !bufferColourTex[0])
+		return;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
 	waterRotate = 0.0f;
 	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45.0f);
 	glScissor(width - 200, height - 200, 200, 200);
@@ -79,6 +111,7 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	init = true;
 }
 
 Renderer::~Renderer() {
@@ -96,6 +129,15 @@ Renderer::~Renderer() {
 	delete sceneShader;
 	delete treeNode;
 	delete rainShader;
+	delete processShader;
+	delete presentShader;
+
+	glDeleteTextures(2, bufferColourTex);
+	glDeleteTextures(1, &bufferDepthTex);
+	glDeleteTextures(1, &ShadowTex);
+	glDeleteFramebuffers(1, &bufferFBO);
+	glDeleteFramebuffers(1, &processFBO);
+	glDeleteFramebuffers(1, &ShadowFBO);
 
 	currentShader = 0;
 }
@@ -121,8 +163,16 @@ bool Renderer::loadShaders() {
 	if (!shadowShader->LinkProgram())
 		return false;
 
-	rainShader = new Shader(SHADERDIR  "TexturedVertex.glsl", SHADERDIR "TexturedFragment.glsl", SHADERDIR "rainGeom.glsl", SHADERDIR "rainTCS.glsl", SHADERDIR "rainTES.glsl");
+	rainShader = new Shader(SHADERDIR  "simpleVert.glsl", SHADERDIR "simpleFrag.glsl", SHADERDIR "rainGeom.glsl", SHADERDIR "rainTCS.glsl", SHADERDIR "rainTES.glsl");
 	if (!rainShader->LinkProgram())
+		return false;
+
+	processShader = new Shader(SHADERDIR  "TexturedVertex.glsl", SHADERDIR "processFrag.glsl");
+	if (!processShader->LinkProgram())
+		return false;
+		
+	presentShader = new Shader(SHADERDIR  "TexturedVertex.glsl", SHADERDIR "TexturedFragment.glsl");
+	if (!presentShader->LinkProgram())
 		return false;
 
 	return true;
@@ -139,15 +189,22 @@ void Renderer::RenderScene() {
 	float currRoll = camera->GetRoll();
 	float currYaw = camera->GetYaw();
 	float currPitch = camera->GetPitch();
-
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glViewport(0, 0, width, height);
 	viewMatrix = camera->BuildViewMatrix();
 	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45.0f);
-	DrawSkyBox();
+	
 	DrawShadowScene();
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	DrawSkyBox();
 	DrawCombinedScene();
 	DrawRain();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	if (postProcess)
+		DrawPostProcess();
+	PresentScene();
+	
 
 	camera->SetPosition(Vector3((RAW_WIDTH * HEIGHTMAP_X / 2.0f) * 3, 12000, (RAW_WIDTH * HEIGHTMAP_Z / 2.0f) * 3));
 	camera->SetPitch(-90);
@@ -190,6 +247,8 @@ void Renderer::DrawShadowScene() {
 }
 
 void Renderer::DrawCombinedScene() {
+	
+	
 	SetCurrentShader(reflectShader);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
@@ -332,4 +391,54 @@ void Renderer::DrawMesh() {
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
 	treeNode->Draw();
+}
+
+void Renderer::DrawPostProcess() {
+	glBindFramebuffer(GL_FRAMEBUFFER, processFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[1], 0);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	SetCurrentShader(processShader);
+	projMatrix = Matrix4::Orthographic(-1, 1, 1, -1, -1, 1);
+	modelMatrix.ToIdentity();
+	viewMatrix.ToIdentity();
+	textureMatrix.ToIdentity();
+	UpdateShaderMatrices();
+
+	glDisable(GL_DEPTH_TEST);
+
+	glUniform2f(glGetUniformLocation(currentShader->GetProgram(), "pixelSize"), 1.0f / width, 1.0f / height);
+
+	for (int i = 0; i < POST_PASSES; ++i) {
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[1], 0);
+		glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "isVertical"), 0);
+
+		test->SetTexture(bufferColourTex[0]);
+		test->Draw();
+
+		glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "isVertical"), 1);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[0], 0);
+
+		test->SetTexture(bufferColourTex[1]);
+		test->Draw();
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(0);
+
+	glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::PresentScene() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	SetCurrentShader(presentShader);
+	projMatrix = Matrix4::Orthographic(-1, 1, 1, -1, -1, 1);
+	viewMatrix.ToIdentity();
+	modelMatrix.ToIdentity();
+	textureMatrix.ToIdentity();
+	UpdateShaderMatrices();
+	test->SetTexture(bufferColourTex[0]);
+	test->Draw();
+	glUseProgram(0);
 }

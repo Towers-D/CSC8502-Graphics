@@ -1,7 +1,7 @@
-#pragma comment(lib, "nclgl.lib")
-
-#include "../NCLGL/window.h"
+#include "../../nclgl/window.h"
 #include "Renderer.h"
+
+#pragma comment(lib, "nclgl.lib")
 
 int main() {
 	Window w("Shadow Mapping! MD5 mesh courtesy of http://www.katsbits.com/", 800,600,false); //This is all boring win32 window creation stuff!

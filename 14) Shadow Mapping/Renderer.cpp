@@ -7,8 +7,8 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	hellData = new MD5FileData(MESHDIR "hellknight.md5mesh");
 	hellNode = new MD5Node(*hellData);
 
-	hellData->AddAnim(MESHDIR "idle2.md5anim");
-	hellNode->PlayAnim(MESHDIR "idle2.md5anim");
+	hellData->AddAnim(MESHDIR "idle1.md5anim");
+	hellNode->PlayAnim(MESHDIR "idle1.md5anim");
 
 	sceneShader = new Shader(SHADERDIR "shadowscenevert.glsl", SHADERDIR "shadowscenefrag.glsl");
 	shadowShader = new Shader(SHADERDIR "shadowVert.glsl", SHADERDIR "shadowFrag.glsl");

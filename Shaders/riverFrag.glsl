@@ -80,8 +80,7 @@ void main(void) {
     lambert *= shadow;
 
     vec3 colour = (diffuse.rgb * diffuseColour.rgb);
-    colour += (specColour.rgb * sFactor) * 0.33;
-    fragColour = vec4(colour * atten * lambert, diffuse.a);
-    fragColour.rgb += (diffuse.rgb * diffuseColour.rgb) * 0.1;
-    //fragColour = vec4(normal, 1);
+    colour += (specColour.rgb * sFactor) * ((time > 12000 ) ? clamp((time - 12500) / 2000, 0.33, atten) : 0.33); //Specular
+    fragColour = vec4(colour * atten * lambert, diffuse.a); // diffuse
+    fragColour.rgb += (diffuse.rgb * diffuseColour.rgb) * 0.1; // ambient
 }

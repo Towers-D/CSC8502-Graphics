@@ -6,7 +6,6 @@ uniform int isVertical;
 
 in Vertex {
     vec2 texCoord;
-    vec4 colour;
 } IN;
 
 out vec4 fragColour;
@@ -20,7 +19,7 @@ void main(void) {
         values = vec2[](vec2(0.0, -pixelSize.y * 2), vec2(0.0, -pixelSize.y * 1), vec2(0.0, 0.0), vec2(0.0, pixelSize.y * 1), vec2(0.0, pixelSize.y * 2));
     }
     else {
-        values = vec2[](vec2(-pixelSize.x * 2, 0.0), vec2(-pixelSize.x * 1), vec2(0.0, 0.0), vec2(0.0, pixelSize.x * 1), vec2(pixelSize.x * 2, 0.0));
+        values = vec2[](vec2(-pixelSize.x * 2, 0.0), vec2(-pixelSize.x * 1, 0.0), vec2(0.0, 0.0), vec2(pixelSize.x * 1, 0.0), vec2(pixelSize.x * 2, 0.0));
     }
 
     for (int i = 0; i < 5; i++){

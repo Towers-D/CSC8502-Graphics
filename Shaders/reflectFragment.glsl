@@ -43,16 +43,15 @@ void main(void) {
 
     float shadow = 1.0;
 
-   /*if (IN.shadowProj.w > 0.0) {
+   if (IN.shadowProj.w > 0.0) {
         shadow = textureProj(shadowTex, IN.shadowProj);
-    }*/
-
-    lambert *= shadow;
+   }
+    //lambert *= shadow;
     
-    //vec4 reflection = texture(cubeTex, reflect(normalize(IN.worldPos - cameraPos), normalize(IN.normal)));
-    vec3 colour = (diffuse.rgb * diffuseColour.rgb);
+    vec4 reflection = texture(cubeTex, reflect(normalize(IN.worldPos - cameraPos), normalize(IN.normal)));
+    
+    vec3 colour = (diffuse.rgb * diffuseColour.rgb) * reflection.rgb;
     colour += (specColour.rgb * sFactor) * 0.33;
-    //fragColour = vec4(colour * atten * lambert, diffuse.a);
-    fragColour = vec4(colour * atten * lambert, diffuse.a); //* (diffuse + reflection);
-    fragColour.rgb += (diffuse.rgb * diffuseColour.rgb) * 0.3;
+    fragColour = vec4(colour * atten * lambert, diffuse.a) ;
+    fragColour.rgb += (diffuse.rgb * diffuseColour.rgb) * 0.1;
 }

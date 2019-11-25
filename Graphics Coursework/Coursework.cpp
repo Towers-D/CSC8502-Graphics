@@ -49,8 +49,8 @@ int main() {
 			pos.x += 5;
 		}
 
-		if (Window::GetKeyboard()->KeyDown(KEYBOARD_P)) {
-			w.switchFullScreen();
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_P)) {
+			renderer.swapProcess();
 		}
 		l->SetPosition(pos);
 	}
