@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../../nclgl/OGLRenderer.h"
-#include "../../nclgl/Camera.h"
-#include "../../nclgl/HeightMap.h"
-#include "../../nclgl/SceneNode.h"
-#include "../../nclgl/Frustrum.h"
-#include "../../nclgl/OBJMesh.h"
+#include "../nclgl/OGLRenderer.h"
+#include "../nclgl/Camera.h"
+#include "../nclgl/HeightMap.h"
+#include "../nclgl/SceneNode.h"
+#include "../nclgl/Frustrum.h"
+#include "../nclgl/OBJMesh.h"
 
 
 #define SHADOWSIZE 2048
@@ -20,10 +20,11 @@ public:
 	virtual void RenderScene();
 	virtual void UpdateScene(float msec);
 
-	void ResetTime() { time = 12000; };
+	void ResetTime() { time = 19000; };
 	bool loadShaders();
 
 	Light* getLight() { return light; };
+	void switchLight() { secondLight = !secondLight; };
 	void swapProcess() { postProcess = !postProcess; };
 
 protected:
@@ -35,27 +36,31 @@ protected:
 	void DrawFloor();
 	void DrawRain();
 	void DrawMesh();
+	void DrawBauble();
 
 	void DrawShadowScene();
 	void DrawCombinedScene();
 
 
-	Shader* reflectShader;
-	Shader* skyboxShader;
+
 	Shader* riverShader;
-	Shader* sceneShader;
+	Shader* skyboxShader;
+	Shader* floorShader;
+	Shader* meshShader;
 	Shader* shadowShader;
 	Shader* rainShader;
 	Shader* processShader;
 	Shader* presentShader;
+	Shader* baubleShader;
 
 	HeightMap* heightMap;
 	Mesh* quad;
-	Mesh* test;
+	Mesh* bufferQuad;
 	Mesh* rain;
+	Mesh* cube;
 
 	Light* light;
-	Light* nolight;
+	Light* cLight;
 	Camera* camera;
 	Camera* overhead;
 
@@ -77,9 +82,11 @@ protected:
 	GLuint bufferDepthTex;
 
 	OBJMesh* treeNode;
+	OBJMesh* sphere;
 
 	float waterRotate;
 	float time = 0;
 
 	bool postProcess = false;
+	bool secondLight = false;
 };

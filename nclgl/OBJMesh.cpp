@@ -257,7 +257,6 @@ all of the children of 'this' will be drawn
 void OBJMesh::Draw() {
 	Mesh::Draw();
 	for(unsigned int i = 0; i < children.size(); ++i) {
-		//children.at(i)->SetTexture(GetTexture());
 		children.at(i)->Draw();
 	}
 };

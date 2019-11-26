@@ -91,6 +91,16 @@ Mesh* Mesh::GenerateQuad() {
 	return m;
 }
 
+void Mesh::giveTexCoords() {
+	if (this->textureCoords)
+		delete this->textureCoords;
+	this->textureCoords = new Vector2[this->numVertices];
+	for (int i = 0; i < this->numVertices; i += 3) {
+		this->textureCoords[i] = Vector2(0.5f, 0.0f);
+		this->textureCoords[i + 1] = Vector2(1.0f, 1.0f);
+		this->textureCoords[i + 2] = Vector2(0.0f, 1.0f);
+	}
+}
 
 
 void Mesh::BufferData() {
@@ -194,7 +204,7 @@ void Mesh::GenerateTangents() {
 		tangents = new Vector3[numVertices];
 
 	if (!textureCoords)
-		return;
+		this->giveTexCoords();
 
 	for (GLuint i = 0; i < numVertices; ++i)
 		tangents[i] = Vector3();

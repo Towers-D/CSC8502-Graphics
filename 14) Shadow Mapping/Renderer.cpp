@@ -7,13 +7,13 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	hellData = new MD5FileData(MESHDIR "hellknight.md5mesh");
 	hellNode = new MD5Node(*hellData);
 
-	hellData->AddAnim(MESHDIR "idle1.md5anim");
-	hellNode->PlayAnim(MESHDIR "idle1.md5anim");
+	hellData->AddAnim(MESHDIR "idle2.md5anim");
+	hellNode->PlayAnim(MESHDIR "idle2.md5anim");
 
-	sceneShader = new Shader(SHADERDIR "shadowscenevert.glsl", SHADERDIR "shadowscenefrag.glsl");
+	meshShader = new Shader(SHADERDIR "shadowscenevert.glsl", SHADERDIR "shadowscenefrag.glsl");
 	shadowShader = new Shader(SHADERDIR "shadowVert.glsl", SHADERDIR "shadowFrag.glsl");
 
-	if (!sceneShader->LinkProgram() || !shadowShader->LinkProgram())
+	if (!meshShader->LinkProgram() || !shadowShader->LinkProgram())
 		return;
 
 	glGenTextures(1, &shadowTex);
@@ -52,7 +52,7 @@ Renderer::~Renderer() {
 	delete hellNode;
 	delete floor;
 
-	delete sceneShader;
+	delete meshShader;
 	delete shadowShader;
 	currentShader = nullptr;
 }
@@ -98,7 +98,7 @@ void Renderer::DrawShadowScene() {
 }
 
 void Renderer::DrawCombinedScene() {
-	SetCurrentShader(sceneShader);
+	SetCurrentShader(meshShader);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), 2);

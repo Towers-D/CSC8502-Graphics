@@ -7,10 +7,10 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	heightMap = new HeightMap(TEXTUREDIR "terrain.raw");
 	heightMap->SetTexture(SOIL_load_OGL_texture(TEXTUREDIR "Barren Reds.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 
-	sceneShader = new Shader(SHADERDIR "TexturedVertex.glsl", SHADERDIR "TexturedFragment.glsl");
+	meshShader = new Shader(SHADERDIR "TexturedVertex.glsl", SHADERDIR "TexturedFragment.glsl");
 	processShader = new Shader(SHADERDIR "TexturedVertex.glsl", SHADERDIR "processFrag.glsl");
 
-	if (!processShader->LinkProgram() || !sceneShader->LinkProgram() || !heightMap->GetTexture())
+	if (!processShader->LinkProgram() || !meshShader->LinkProgram() || !heightMap->GetTexture())
 		return;
 
 	SetTextureRepeating(heightMap->GetTexture(), true);
@@ -50,7 +50,7 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 }
 
 Renderer::~Renderer() {
-	delete sceneShader;
+	delete meshShader;
 	delete processShader;
 	currentShader = NULL;
 
@@ -80,7 +80,7 @@ void Renderer::DrawScene() {
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	SetCurrentShader(sceneShader);
+	SetCurrentShader(meshShader);
 	projMatrix = Matrix4::Perspective(1.0f, 10000.0f, (float) width / (float) height, 45.0f);
 	UpdateShaderMatrices ();
 
@@ -127,7 +127,7 @@ void Renderer::DrawPostProcess() {
 void Renderer::PresentScene() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	SetCurrentShader(sceneShader);
+	SetCurrentShader(meshShader);
 	projMatrix = Matrix4::Orthographic(-1, 1, 1, -1, -1, 1);
 	viewMatrix.ToIdentity();
 	UpdateShaderMatrices();

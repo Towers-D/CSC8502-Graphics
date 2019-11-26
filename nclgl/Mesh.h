@@ -24,6 +24,8 @@ public:
 
 	void SetType(GLuint newType) { type = newType; };
 
+	void giveTexCoords();
+
 protected:
 	void BufferData();
 	void GenerateNormals();

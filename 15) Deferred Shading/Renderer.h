@@ -22,7 +22,7 @@ protected:
 
 	void GenerateScreenTexture(GLuint& into, bool depth = false);
 
-	Shader* sceneShader;
+	Shader* meshShader;
 	Shader* pointlightShader;
 	Shader* combineShader;
 

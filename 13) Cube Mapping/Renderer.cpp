@@ -9,11 +9,11 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 
 	light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f), 500.0f, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)), Vector4(0.9f, 0.9f, 1.0f, 1), (RAW_WIDTH * HEIGHTMAP_X) / 2.0f);
 
-	reflectShader = new Shader(SHADERDIR "PerPixelVertex.glsl", SHADERDIR "reflectFragment.glsl");
+	riverShader = new Shader(SHADERDIR "PerPixelVertex.glsl", SHADERDIR "reflectFragment.glsl");
 	skyboxShader = new Shader(SHADERDIR "skyboxVertex.glsl", SHADERDIR "skyboxFragment.glsl");
 	lightShader = new Shader(SHADERDIR "PerPixelVertex.glsl", SHADERDIR "BumpFragment.glsl");
 
-	if (!reflectShader->LinkProgram() || !lightShader->LinkProgram() || !skyboxShader->LinkProgram())
+	if (!riverShader->LinkProgram() || !lightShader->LinkProgram() || !skyboxShader->LinkProgram())
 		return;
 
 	quad->SetTexture(SOIL_load_OGL_texture(TEXTUREDIR "water.TGA", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
@@ -52,7 +52,7 @@ Renderer::~Renderer() {
 	delete camera;
 	delete heightMap;
 	delete quad;
-	delete reflectShader;
+	delete riverShader;
 	delete skyboxShader;
 	delete lightShader;
 	delete light;
@@ -105,7 +105,7 @@ void Renderer::DrawHeightmap() {
 }
 
 void Renderer::DrawWater() {
-	SetCurrentShader(reflectShader);
+	SetCurrentShader(riverShader);
 	SetShaderLight(*light);
 	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), "cameraPos"), 1, (float*) & camera->GetPosition());
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);

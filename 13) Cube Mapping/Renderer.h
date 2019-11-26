@@ -18,7 +18,7 @@ protected:
 	void DrawSkyBox();
 
 	Shader* lightShader;
-	Shader* reflectShader;
+	Shader* riverShader;
 	Shader* skyboxShader;
 
 	HeightMap* heightMap;

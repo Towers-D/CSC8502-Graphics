@@ -19,7 +19,7 @@ protected:
 	void DrawPostProcess();
 	void DrawScene();
 
-	Shader* sceneShader;
+	Shader* meshShader;
 	Shader* processShader;
 
 	Camera* camera;

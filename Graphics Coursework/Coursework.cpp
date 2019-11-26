@@ -1,7 +1,7 @@
 #pragma comment(lib, "nclgl.lib")
 
-#include "../../nclgl/window.h"
-#include "../../nclgl/light.h"
+#include "../nclgl/Window.h"
+#include "../nclgl/light.h"
 #include "Renderer.h"
 
 int main() {
@@ -51,6 +51,9 @@ int main() {
 
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_P)) {
 			renderer.swapProcess();
+		}
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_L)) {
+			renderer.switchLight();
 		}
 		l->SetPosition(pos);
 	}

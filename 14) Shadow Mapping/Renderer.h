@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../nclgl/OGLRenderer.h"
-#include "../../nclgl/Camera.h"
-#include "../../nclgl/MD5Mesh.h"
-#include "../../nclgl/MD5Node.h"
+#include "../nclgl/OGLRenderer.h"
+#include "../nclgl/Camera.h"
+#include "../nclgl/MD5Mesh.h"
+#include "../nclgl/MD5Node.h"
 
 #define SHADOWSIZE 2048
 
@@ -21,7 +21,7 @@ protected:
 	void DrawShadowScene();
 	void DrawCombinedScene();
 
-	Shader* sceneShader;
+	Shader* meshShader;
 	Shader* shadowShader;
 
 	GLuint shadowTex;

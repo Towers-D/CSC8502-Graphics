@@ -37,8 +37,8 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	if (!sphere->LoadOBJMesh(MESHDIR "ico.obj"))
 		return;
 
-	sceneShader = new Shader(SHADERDIR"BumpVertex.glsl", SHADERDIR "bufferFragment.glsl");
-	if (!sceneShader->LinkProgram())
+	meshShader = new Shader(SHADERDIR"BumpVertex.glsl", SHADERDIR "bufferFragment.glsl");
+	if (!meshShader->LinkProgram())
 		return;
 	
 	combineShader = new Shader(SHADERDIR"combinevert.glsl", SHADERDIR "combinefrag.glsl");
@@ -87,7 +87,7 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 }
 
 Renderer::~Renderer() {
-	delete sceneShader;
+	delete meshShader;
 	delete combineShader;
 	delete pointlightShader;
 
@@ -141,7 +141,7 @@ void Renderer::FillBuffers() {
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	SetCurrentShader(sceneShader);
+	SetCurrentShader(meshShader);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 

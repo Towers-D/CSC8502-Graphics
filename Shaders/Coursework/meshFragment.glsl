@@ -7,8 +7,16 @@ uniform sampler2DShadow shadowTex;
 uniform vec4 diffuseColour;
 uniform vec4 specColour;
 uniform vec3 lightPos;
-uniform vec3 cameraPos;
 uniform float lightRadius;
+
+uniform vec4 diffuseColour2;
+uniform vec4 specColour2;
+uniform vec3 lightPos2;
+uniform float lightRadius2;
+
+uniform vec3 cameraPos;
+
+uniform int secondLight;
 
 in Vertex {
     vec4 colour;
@@ -56,6 +64,28 @@ void main (void) {
 
     vec3 colour = (diffuse.rgb * diffuseColour.rgb);
     colour += (specColour.rgb * sFactor) * 0.33;
-    fragColour = vec4(colour * atten * lambert, diffuse.a);
-    fragColour.rgb += (diffuse.rgb * diffuseColour.rgb) * 0.3;
+    vec4 light1 = vec4(colour * atten * lambert, diffuse.a);
+    light1.rgb += (diffuse.rgb * diffuseColour.rgb) * 0.3;
+    
+
+    vec3 incident2 = normalize(lightPos2 - IN.worldPos);
+    float lambert2 = max(0.0, dot(incident2, normal));
+
+    float dist2 = length(lightPos2 - IN.worldPos);
+    float atten2 = 1.0 - clamp(dist2/lightRadius2, 0.0, 1.0);
+
+    vec3 viewDir2 = normalize(cameraPos - IN.worldPos);
+    vec3 halfDir2 = normalize(incident2 + viewDir2);
+
+    float rFactor2 = max(0.0, dot(halfDir2, normal));
+    float sFactor2 = pow(rFactor2, 33.0);
+
+    vec3 colour2 = diffuseColour2.rgb;
+    colour2 += (specColour2.rgb * sFactor2) * 0.33;
+    vec4 light2 = vec4(colour2 * atten2 * lambert2, diffuse.a);
+    light2.rgb += (diffuse.rgb * diffuseColour2.rgb) * 0.3;
+    if (secondLight == 1)
+        fragColour = light1*0.5 + light2*0.5;
+    else
+    fragColour = light1;
 }

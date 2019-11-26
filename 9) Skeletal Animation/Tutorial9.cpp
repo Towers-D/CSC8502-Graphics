@@ -1,6 +1,6 @@
 #pragma comment(lib, "nclgl.lib")
 
-#include "../../nclgl/window.h"
+#include "../nclgl/window.h"
 #include "Renderer.h"
 
 int main() {

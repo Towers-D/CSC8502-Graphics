@@ -32,6 +32,8 @@ public:
 		this->roll		= 0;
 	}
 
+	void switchMovement() { freeMove = !freeMove; };
+
 	~Camera(void){};
 
 	void UpdateCamera(float msec = 10.0f);
@@ -65,6 +67,8 @@ protected:
 	float	pitch;
 	float	roll;
 	Vector3 position;
+
+	bool freeMove = true;
 
 	int speedDiv = 5;
 };

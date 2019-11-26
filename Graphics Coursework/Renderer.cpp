@@ -1,5 +1,5 @@
 #include "Renderer.h"
-#include "../../nclgl/CubeRobot.h"
+#include <algorithm>
 
 Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	camera = new Camera();
@@ -8,12 +8,17 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	heightMap = new HeightMap(TEXTUREDIR "/terrain.raw");
 	quad = Mesh::GenerateQuad();
 	rain = Mesh::GenerateQuad();
-	test = Mesh::GenerateQuad();
+	bufferQuad = Mesh::GenerateQuad();
 	rain->SetType(GL_PATCHES);
 	treeNode = new OBJMesh(MESHDIR "lowtree.obj");
+	sphere = new OBJMesh(MESHDIR "sphere.obj");
+	
 
 	glViewport(0, 0, 200, 200);
-	light =  new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f) * 3, 750, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f) * 3), Vector4(0.9, 0.9, 1, 1), (RAW_WIDTH * HEIGHTMAP_X) * 3);
+	light =  new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f) * 3, 1000, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f) * 3), Vector4(0.9, 0.9, 1, 1), (RAW_WIDTH * HEIGHTMAP_X) * 3);
+	cLight = new Light(Vector3(7200, 1500, 4396), Vector4(1, 1, 0, 1), 800);
+	
+
 	loadShaders();
 
 	heightMap->SetTexture(SOIL_load_OGL_texture(TEXTUREDIR "Barren Reds.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
@@ -33,8 +38,8 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 
 	rain->SetTexture(SOIL_load_OGL_texture(TEXTUREDIR "water.TGA", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	
-	treeNode->SetTexture(SOIL_load_OGL_texture(TEXTUREDIR "Barren Reds.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	treeNode->SetBumpMap(SOIL_load_OGL_texture(TEXTUREDIR "Barren RedsDOT3.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	treeNode->SetTexture(SOIL_load_OGL_texture(TEXTUREDIR "grass 3.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	treeNode->SetBumpMap(SOIL_load_OGL_texture(TEXTUREDIR "grass 3Dot3.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 
 	if (!red || !blue || !green || !grass || !grassNorm || !mud || !mudNorm ||!cubeMap || !quad->GetTexture() || !quad->GetBumpMap() || !heightMap->GetTexture() || !heightMap->GetBumpMap() || !rain->GetTexture() || !treeNode->GetTexture() || !treeNode->GetBumpMap())
 		return;
@@ -114,6 +119,8 @@ Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	init = true;
 }
 
+
+
 Renderer::~Renderer() {
 	delete camera;
 	delete heightMap;
@@ -122,11 +129,11 @@ Renderer::~Renderer() {
 
 	delete light;
 
-	delete reflectShader;
-	delete skyboxShader;
 	delete riverShader;
+	delete skyboxShader;
+	delete floorShader;
 	delete shadowShader;
-	delete sceneShader;
+	delete meshShader;
 	delete treeNode;
 	delete rainShader;
 	delete processShader;
@@ -143,36 +150,40 @@ Renderer::~Renderer() {
 }
 
 bool Renderer::loadShaders() {
-	reflectShader = new Shader(SHADERDIR "PerPixelVertex.glsl", SHADERDIR "reflectFragment.glsl");
-	if (!reflectShader->LinkProgram())
-		return false;
-
-	skyboxShader = new Shader(SHADERDIR "skyboxVertex.glsl", SHADERDIR "skyboxFragment.glsl");
-	if (!skyboxShader->LinkProgram())
-		return false;
-
-	riverShader = new Shader(SHADERDIR "riverVert.glsl", SHADERDIR "riverFrag.glsl");
+	riverShader = new Shader(SHADERDIR "Coursework/riverVertex.glsl", SHADERDIR "Coursework/riverFragment.glsl");
 	if (!riverShader->LinkProgram())
 		return false;
 
-	sceneShader = new Shader(SHADERDIR "shadowscenevert.glsl", SHADERDIR "shadowscenefrag.glsl");
-	if (!sceneShader->LinkProgram())
+	skyboxShader = new Shader(SHADERDIR "Coursework/skyboxVertex.glsl", SHADERDIR "Coursework/skyboxFragment.glsl");
+	if (!skyboxShader->LinkProgram())
 		return false;
 
-	shadowShader = new Shader(SHADERDIR "shadowVert.glsl", SHADERDIR "shadowFrag.glsl");
+	floorShader = new Shader(SHADERDIR "Coursework/floorVertex.glsl", SHADERDIR "Coursework/floorFragment.glsl");
+	if (!floorShader->LinkProgram())
+		return false;
+
+	meshShader = new Shader(SHADERDIR "Coursework/meshVertex.glsl", SHADERDIR "Coursework/meshFragment.glsl");
+	if (!meshShader->LinkProgram())
+		return false;
+
+	shadowShader = new Shader(SHADERDIR "Coursework/shadowVert.glsl", SHADERDIR "Coursework/shadowFrag.glsl");
 	if (!shadowShader->LinkProgram())
 		return false;
 
-	rainShader = new Shader(SHADERDIR  "simpleVert.glsl", SHADERDIR "simpleFrag.glsl", SHADERDIR "rainGeom.glsl", SHADERDIR "rainTCS.glsl", SHADERDIR "rainTES.glsl");
+	rainShader = new Shader(SHADERDIR  "Coursework/rainVertex.glsl", SHADERDIR "Coursework/rainFragment.glsl", SHADERDIR "Coursework/rainGeometry.glsl", SHADERDIR "Coursework/rainTCS.glsl", SHADERDIR "Coursework/rainTES.glsl");
 	if (!rainShader->LinkProgram())
 		return false;
 
-	processShader = new Shader(SHADERDIR  "TexturedVertex.glsl", SHADERDIR "processFrag.glsl");
+	processShader = new Shader(SHADERDIR  "Coursework/sharedVertex.glsl", SHADERDIR "Coursework/processFrag.glsl");
 	if (!processShader->LinkProgram())
 		return false;
 		
-	presentShader = new Shader(SHADERDIR  "TexturedVertex.glsl", SHADERDIR "TexturedFragment.glsl");
+	presentShader = new Shader(SHADERDIR  "Coursework/sharedVertex.glsl", SHADERDIR "Coursework/presentFragment.glsl");
 	if (!presentShader->LinkProgram())
+		return false;
+	
+	baubleShader = new Shader(SHADERDIR  "Coursework/sharedVertex.glsl", SHADERDIR "Coursework/BaubleFragment.glsl");
+	if (!baubleShader->LinkProgram())
 		return false;
 
 	return true;
@@ -200,6 +211,11 @@ void Renderer::RenderScene() {
 	DrawSkyBox();
 	DrawCombinedScene();
 	DrawRain();
+	if (time > 32000) {
+		DrawBauble();
+		if (!secondLight)
+			switchLight();
+	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	if (postProcess)
 		DrawPostProcess();
@@ -247,9 +263,7 @@ void Renderer::DrawShadowScene() {
 }
 
 void Renderer::DrawCombinedScene() {
-	
-	
-	SetCurrentShader(reflectShader);
+	SetCurrentShader(riverShader);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), 3);
@@ -264,7 +278,7 @@ void Renderer::DrawCombinedScene() {
 	UpdateShaderMatrices();
 	DrawWater();
 
-	SetCurrentShader(riverShader);
+	SetCurrentShader(floorShader);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), 3);
@@ -279,7 +293,7 @@ void Renderer::DrawCombinedScene() {
 	UpdateShaderMatrices();
 	DrawFloor();
 
-	/*SetCurrentShader(sceneShader);
+	SetCurrentShader(meshShader);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), 3);
@@ -287,13 +301,20 @@ void Renderer::DrawCombinedScene() {
 
 	SetShaderLight(*light);
 
+	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), "lightPos2"), 1, (float*) &cLight->GetPosition());
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "secondLight"), secondLight);
+
+	glUniform4fv(glGetUniformLocation(currentShader->GetProgram(), "diffuseColour2"), 1, (float*) &cLight->GetDiff());
+	glUniform4fv(glGetUniformLocation(currentShader->GetProgram(), "specColour2"), 1, (float*) &cLight->GetSpec());
+	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "lightRadius2"), cLight->GetRadius());
+
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, ShadowTex);
 
 	viewMatrix = camera->BuildViewMatrix();
 	UpdateShaderMatrices();
 
-	DrawMesh();*/
+	DrawMesh();
 	glUseProgram(0);
 }
 
@@ -386,11 +407,26 @@ void Renderer::DrawRain() {
 }
 
 void Renderer::DrawMesh() {
-	modelMatrix = Matrix4::Scale(Vector3(200, 200, 200)) * Matrix4::Translation(Vector3(11, 1, 4));
+	int maxScale = 200;
+	float meshTime = min(maxScale - 1, max((time - 20000)/50, 0));
+	modelMatrix = Matrix4::Translation(Vector3(36 * maxScale, 3.4 * maxScale, 22 * maxScale)) * Matrix4::Scale(Vector3(meshTime, meshTime, meshTime));
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
 	treeNode->Draw();
+}
+
+void Renderer::DrawBauble() {
+	SetCurrentShader(baubleShader);
+	viewMatrix = camera->BuildViewMatrix();
+	UpdateShaderMatrices();
+
+	modelMatrix = Matrix4::Scale(Vector3(200, 200, 200)) * Matrix4::Translation(Vector3(36, 7, 21.98)) * Matrix4::Scale(Vector3(0.1f, 0.1f, 0.1f));
+	Matrix4 tempMatrix = textureMatrix * modelMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
+	sphere->Draw();
+	glUseProgram(0);
 }
 
 void Renderer::DrawPostProcess() {
@@ -413,14 +449,14 @@ void Renderer::DrawPostProcess() {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[1], 0);
 		glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "isVertical"), 0);
 
-		test->SetTexture(bufferColourTex[0]);
-		test->Draw();
+		bufferQuad->SetTexture(bufferColourTex[0]);
+		bufferQuad->Draw();
 
 		glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "isVertical"), 1);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex[0], 0);
 
-		test->SetTexture(bufferColourTex[1]);
-		test->Draw();
+		bufferQuad->SetTexture(bufferColourTex[1]);
+		bufferQuad->Draw();
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -438,7 +474,7 @@ void Renderer::PresentScene() {
 	modelMatrix.ToIdentity();
 	textureMatrix.ToIdentity();
 	UpdateShaderMatrices();
-	test->SetTexture(bufferColourTex[0]);
-	test->Draw();
+	bufferQuad->SetTexture(bufferColourTex[0]);
+	bufferQuad->Draw();
 	glUseProgram(0);
 }
