@@ -23,6 +23,31 @@ public:
 		yaw		= 0.0f;
 		pitch	= 0.0f;
 		roll	= 0.0f;
+		points = std::vector<Vector3>();
+
+		points.push_back(this->position);
+		points.push_back(Vector3(3214.54, 1067.01, 3720.28));
+		points.push_back(Vector3(6991.49, 1067.01, 9227.1));
+		points.push_back(Vector3(11000.6, 883.303, 6547.01));
+
+		points.push_back(Vector3(12449.7, 1234.97, 6552.66));
+		points.push_back(Vector3(10775.3, 117.367, 5658.05));
+		points.push_back(Vector3(7861.1, 1118.13, 5916.11));
+
+		points.push_back(Vector3(5925.33, 1485.08, 3683.89));
+		points.push_back(Vector3(7273.82, 1485.08, 2961.63));
+		points.push_back(Vector3(8131.33, 1485.08, 5536.2));
+
+		look.push_back(Vector3(9130.21, 618.146, 6196.4	));
+		look.push_back(Vector3(4432.9, 468.027, 6938.92	));
+		look.push_back(Vector3(9168.01, 101.058, 5249.43));
+
+		look.push_back(Vector3(7100.36, 302.058, 3940.93));
+		look.push_back(Vector3(5032.71, 503.038, 2632.34));
+		look.push_back(Vector3(6114.765, 970.054, 3512.41));
+
+		look.push_back(Vector3(7196.82, 1437.07, 4392.82));
+		look.push_back(Vector3(7196.82, 1437.07, 4492.82));
 	};
 
 	Camera(float pitch, float yaw, Vector3 position){
@@ -33,6 +58,7 @@ public:
 	}
 
 	void switchMovement() { freeMove = !freeMove; };
+	void switchMiniMap() { miniMap = !miniMap; };
 
 	~Camera(void){};
 
@@ -61,14 +87,31 @@ public:
 	float	GetRoll() const { return roll; }
 	//Sets roll, in degrees
 	void	SetRoll(float r) { roll = r; }
+	float tim = 0;
+	float tim2 = 0;
 
 protected:
 	float	yaw;
 	float	pitch;
 	float	roll;
 	Vector3 position;
+	Vector3 PrevEnd;
+	Vector3 lastPos;
+
+	Vector3 BCurved(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t);
+
+	float alpha = 0.5;
+	float tension = 0;
+
+	int point = 0;
+	int flPoint = 0;
+	float clp2 = 0;
 
 	bool freeMove = true;
+	bool miniMap = false;
 
 	int speedDiv = 5;
+
+	std::vector<Vector3> points;
+	vector<Vector3> look;
 };

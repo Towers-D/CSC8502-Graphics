@@ -3,7 +3,8 @@
 
 Renderer::Renderer(Window& parent) : OGLRenderer(parent) {
 	camera = new Camera();
-	camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 500.0f, RAW_WIDTH * HEIGHTMAP_X));
+	camera->switchMovement();
+	camera->SetPosition(Vector3(-132.561, 1067.01, 5983.46));
 
 	heightMap = new HeightMap(TEXTUREDIR "/terrain.raw");
 	quad = Mesh::GenerateQuad();
@@ -226,6 +227,7 @@ void Renderer::RenderScene() {
 	camera->SetPitch(-90);
 	camera->SetYaw(0);
 	camera->SetRoll(0);
+	camera->switchMiniMap();
 	
 	glViewport(width - 200, height - 200, 200, 200);
 	glEnable(GL_SCISSOR_TEST);
@@ -238,6 +240,7 @@ void Renderer::RenderScene() {
 	camera->SetPitch(currPitch);
 	camera->SetYaw(currYaw);
 	camera->SetRoll(currRoll);
+	camera->switchMiniMap();
 
 	SwapBuffers();
 }

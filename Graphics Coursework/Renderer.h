@@ -20,7 +20,7 @@ public:
 	virtual void RenderScene();
 	virtual void UpdateScene(float msec);
 
-	void ResetTime() { time = 19000; };
+	void ResetTime() { time = 0; };
 	bool loadShaders();
 
 	Light* getLight() { return light; };
