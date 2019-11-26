@@ -1,3 +1,4 @@
+
 #include "Camera.h"
 
 /*
@@ -126,6 +127,7 @@ Matrix4 Camera::BuildViewMatrix()	{
 	return Matrix4::BuildViewMatrix(position, lastPos);
 };
 
+//Code from https://qroph.github.io/2018/07/30/smooth-paths-using-catmull-rom-splines.html
 Vector3 Camera::BCurved(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t) {
 	float t01 = pow(Vector3::distance(p0, p1), alpha);
 	float t12 = pow(Vector3::distance(p1, p2), alpha);

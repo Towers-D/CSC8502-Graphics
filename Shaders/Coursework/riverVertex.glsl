@@ -1,3 +1,4 @@
+//Author David Towers (160243066)
 #version 150 core
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;

@@ -1,3 +1,4 @@
+//Author David Towers (160243066)
 #pragma comment(lib, "nclgl.lib")
 
 #include "../nclgl/Window.h"

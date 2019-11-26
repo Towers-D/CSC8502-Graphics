@@ -1,3 +1,4 @@
+//Author David Towers (160243066)
 #pragma once
 
 #include "../nclgl/OGLRenderer.h"

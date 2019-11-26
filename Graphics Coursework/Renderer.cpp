@@ -1,3 +1,4 @@
+//Author David Towers (160243066)
 #include "Renderer.h"
 #include <algorithm>
 

@@ -1,3 +1,4 @@
+//Author David Towers (160243066)
 #version 330 core
 layout (triangles) in;
 layout (points, max_vertices = 1) out;
